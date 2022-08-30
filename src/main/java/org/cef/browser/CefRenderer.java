@@ -59,8 +59,8 @@ public class CefRenderer {
     protected void initialize() {
         GlStateManager._enableTexture();
         texture_id_[0] = GlStateManager._genTexture();
-        System.out.println("LA TEXTURA ES: ");
-        System.out.println(texture_id_[0]);
+        //.out.println("LA TEXTURA ES: ");
+        //System.out.println(texture_id_[0]);
 
         if (MCEF.CHECK_VRAM_LEAK)
             GL_TEXTURES.add(texture_id_[0]);

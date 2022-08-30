@@ -161,7 +161,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectKeyTyped(int key, int mods) {
-        if( key != GLFW_KEY_BACKSPACE && key != VK_UNDEFINED) {
+        if( key != VK_UNDEFINED) {
             KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, (char) key, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
             sendKeyEvent(ev);
         } else {
