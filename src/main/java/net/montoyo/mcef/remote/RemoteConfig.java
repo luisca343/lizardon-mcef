@@ -1,16 +1,5 @@
 package net.montoyo.mcef.remote;
 
-import com.google.gson.*;
-import net.minecraft.client.Minecraft;
-import net.montoyo.mcef.MCEF;
-import net.montoyo.mcef.client.ClientProxy;
-import net.montoyo.mcef.setup.FileListing;
-import net.montoyo.mcef.utilities.IProgressListener;
-import net.montoyo.mcef.utilities.Log;
-import net.montoyo.mcef.utilities.Util;
-import net.montoyo.mcef.utilities.Version;
-import org.cef.OS;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,7 +7,22 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static net.montoyo.mcef.client.ClientProxy.JCEF_ROOT;
+import net.minecraft.client.Minecraft;
+import net.montoyo.mcef.setup.FileListing;
+import org.cef.OS;
+
+import net.montoyo.mcef.MCEF;
+import net.montoyo.mcef.client.ClientProxy;
+import net.montoyo.mcef.utilities.IProgressListener;
+import net.montoyo.mcef.utilities.Log;
+import net.montoyo.mcef.utilities.Util;
+import net.montoyo.mcef.utilities.Version;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  * A class for updating and parsing the remote configuration file.
@@ -26,18 +30,18 @@ import static net.montoyo.mcef.client.ClientProxy.JCEF_ROOT;
  *
  */
 public class RemoteConfig {
-    
+
     private static String PLATFORM;
     private ResourceList resources = new ResourceList();
     private ArrayList<String> extract = new ArrayList<String>();
     private String version = null;
-    
+
     public RemoteConfig() {
     }
-    
+
     /**
      * Parses the MCEF configuration file.
-     * 
+     *
      * @param f The configuration file.
      * @return The parsed configuration file.
      */
@@ -58,33 +62,33 @@ public class RemoteConfig {
             return null;
         }
     }
-    
+
     /**
      * Updates the MCEF configuration file and parses it.
      * @return The parsed configuration file.
      */
     private JsonObject readConfig() {
-        File newCfg = new File(JCEF_ROOT, "mcef2.new");
-        File cfgFle = new File(JCEF_ROOT, "mcef2.json");
+        File newCfg = new File(ClientProxy.JCEF_ROOT, "mcef2.new");
+        File cfgFle = new File(ClientProxy.JCEF_ROOT, "mcef2.json");
 
         boolean ok = Util.download("config2.json", newCfg, null);
 
         if(ok) {
             Util.delete(cfgFle);
-            
+
             if(newCfg.renameTo(cfgFle))
                 return readConfig(cfgFle);
             else {
                 Log.warning("Couldn't rename mcef2.new to mcef2.json.");
                 return readConfig(newCfg);
             }
-            
+
         } else {
             Log.warning("Couldn't read remote config. Using local configuration file.");
             return readConfig(cfgFle);
         }
     }
-    
+
     /**
      * Updates the MCEF configuration file and parses it.
      * Fills the resources, extract and version fields from it.
@@ -96,7 +100,7 @@ public class RemoteConfig {
             ClientProxy.VIRTUAL = true;
             return;
         }
-        
+
         String id;
         if(OS.isWindows())
             id = "win";
@@ -110,15 +114,15 @@ public class RemoteConfig {
             ClientProxy.VIRTUAL = true;
             return;
         }
-        
+
         String arch = System.getProperty("sun.arch.data.model");
-        if(!arch.equals("64")) {
+        if(!arch.equals("32") && !arch.equals("64")) {
             //Shouldn't happen.
             Log.error("Your CPU arch isn't supported by MCEF. Entering virtual mode.");
             ClientProxy.VIRTUAL = true;
             return;
         }
-        
+
         PLATFORM = id + arch;
         Log.info("Detected platform: %s", PLATFORM);
 
@@ -144,32 +148,28 @@ public class RemoteConfig {
             ClientProxy.VIRTUAL = true;
             return;
         }
-        
+
         resources.clear();
         addResources(res.getAsJsonObject(), PLATFORM);
 
         res = catObj.get("shared");
         if(res != null && res.isJsonObject())
             addResources(res.getAsJsonObject(), "shared");
-        
+
         JsonElement ext = vData.get("extract");
         if(ext != null && ext.isJsonArray()) {
             JsonArray ray = ext.getAsJsonArray();
-            
+
             for(JsonElement e: ray) {
                 if(e != null && e.isJsonPrimitive())
                     extract.add(e.getAsString());
             }
         }
 
-        String actualVersion = String.valueOf(Minecraft.getInstance().getGame().getVersion());
-        
         JsonElement mcVersions = json.get("latestVersions");
         if(mcVersions != null && mcVersions.isJsonObject()) {
-            JsonElement cVer = mcVersions.getAsJsonObject().get("1.16.5");
+            JsonElement cVer = mcVersions.getAsJsonObject().get(Minecraft.getInstance().getLaunchedVersion());
 
-            // My glibc version is 2.31 :( so newer doesn't work
-            
             if(cVer != null && cVer.isJsonPrimitive())
                 version = cVer.getAsString();
         }
@@ -192,10 +192,10 @@ public class RemoteConfig {
                 resources.add(new Resource(key, e.getValue().getAsString(), pform));
         }
     }
-    
+
     /**
      * Detects missing files, download them, and if needed, extracts them.
-     * 
+     *
      * @param ipl The progress listener.
      * @return true if the operation was successful.
      */
@@ -215,23 +215,23 @@ public class RemoteConfig {
                 if(!r.download(ipl))
                     return false;
             }
-            
+
             for(String r: extract) {
                 Resource res = resources.fromFileName(r);
                 if(res == null) //Not missing; no need to extract
                     continue;
-                
+
                 if(!res.extract(ipl)) //Probably not a huge problem if we can't extract some resources... no need to return.
                     Log.warning("Couldn't extract %s. MCEF may not work because of this.", r);
             }
-            
+
             Log.info("Done; all resources were downloaded.");
         } else
             Log.info("None are missing. Good.");
-        
+
         return true;
     }
-    
+
     /**
      * Returns an info string if an MCEF update is available.
      * @return an info string if a newer version exists, null otherwise.
@@ -239,13 +239,13 @@ public class RemoteConfig {
     public String getUpdateString() {
         if(version == null)
             return null;
-        
+
         Version cur = new Version(MCEF.VERSION);
         Version cfg = new Version(version);
-        
+
         if(cfg.isBiggerThan(cur))
             return "New MCEF version available. Current: " + cur + ", latest: " + cfg + '.';
-        
+
         return null;
     }
 
@@ -266,7 +266,7 @@ public class RemoteConfig {
 
         if(!zipOnly) {
             for(Resource r: resources)
-                fl.addFile(JCEF_ROOT + "/" + r.getFileName());
+                fl.addFile(r.getFileName());
         }
 
         boolean allOk = true;

@@ -2,6 +2,9 @@ package net.montoyo.mcef.example;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.java.games.input.Controller;
+import net.java.games.input.Keyboard;
+import net.minecraft.client.KeyboardListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.button.Button;
@@ -16,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+
 
 public class BrowserScreen extends Screen {
 
@@ -67,7 +71,6 @@ public class BrowserScreen extends Screen {
 
 
         //Create GUI
-        // Keyboard.enableRepeatEvents(true);
         // buttonList.clear();
 
         if(url == null) {
@@ -189,18 +192,27 @@ public class BrowserScreen extends Screen {
             }
             return true;
         }
-
         boolean focused = url.isFocused();
+
+        switch(keyCode) {
+            case GLFW.GLFW_KEY_BACKSPACE: {
+                browser.injectKeyTyped((char)8, 0);
+                if(browser != null && !focused) { //Inject events into browser
+                    System.out.println("Sent keystroke ");
+                    if(pressed)
+                        browser.injectKeyPressedByKeyCode(8, (char)8, 0);
+                    else
+                        browser.injectKeyReleasedByKeyCode(8,  (char)8, 0);
+
+                    return true; // Something did happen
+                }
+            }
+        }
 
 
         String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
         if(keystr == null ) return false;
 
-        System.out.println("KEY STR " + keystr);
-        //InputConstants.Key iuKey = InputConstants.getKey(keyCode, scanCode);
-        //String keystr = iuKey.getDisplayName().getString();
-        // String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
-        System.out.println("KEY STR " + keystr);
         if(keystr.length() == 0){
             return false;
         }
@@ -213,9 +225,6 @@ public class BrowserScreen extends Screen {
             else
                 browser.injectKeyReleasedByKeyCode(keyCode, key, 0);
 
-            switch(keyCode) {
-                case GLFW.GLFW_KEY_BACKSPACE: browser.injectKeyTyped(keyCode, 0);
-            }
             return true; // Something did happen
         }
 

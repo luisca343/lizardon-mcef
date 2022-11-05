@@ -150,7 +150,7 @@ public class ClientProxy extends BaseProxy {
             settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
             // settings.user_agent = "MCEF"
 
-            CefApp.startup(MCEF.CEF_ARGS);
+            CefApp.startup();
             cefApp = CefApp.getInstance(settings);
 
             // Custom scheme broken on Linux, for now

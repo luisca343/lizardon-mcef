@@ -14,7 +14,7 @@ import net.montoyo.mcef.utilities.Log;
 @Mod("mcef")
 public class MCEF {
 
-    public static final String VERSION = "1.33";
+    public static final String VERSION = "1.11";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
@@ -51,7 +51,7 @@ public class MCEF {
 
         //Config: exampleBrowser
         ENABLE_EXAMPLE = cfg.getBoolean("enable", "exampleBrowser", true, "Set this to false if you don't want to enable the F10 browser.");
-        HOME_PAGE = cfg.getString("home", "exampleBrowser", "https://google.com", "The home page of the F10 browser.");
+        HOME_PAGE = cfg.getString("home", "exampleBrowser", "http://google.es", "The home page of the F10 browser.");
 
         //Config: debug
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");

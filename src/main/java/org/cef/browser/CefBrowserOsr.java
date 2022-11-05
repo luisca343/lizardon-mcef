@@ -160,26 +160,16 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
 
     @Override
-    public void injectKeyTyped(int key, int mods) {
-        if( key != VK_UNDEFINED) {
-            KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, (char) key, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
-            sendKeyEvent(ev);
-        } else {
-            switch (key) {
-                // GLFW_KEY_HOME, VK_END, VK_PAGE_UP, VK_PAGE_DOWN, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_BEGIN, VK_KP_LEFT, VK_KP_UP, VK_KP_RIGHT, VK_KP_DOWN, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24, VK_PRINTSCREEN, VK_SCROLL_LOCK, VK_CAPS_LOCK, VK_NUM_LOCK, VK_PAUSE, GLFW_KEY_INSERT, GLFW_KEY_BACKSPACE
-                /*case GLFW_KEY_HOME:case VK_END:case VK_PAGE_UP:case VK_PAGE_DOWN:case VK_UP:case VK_DOWN:case VK_LEFT:case VK_RIGHT:case VK_BEGIN:case VK_KP_LEFT:case VK_KP_UP:case VK_KP_RIGHT:case VK_KP_DOWN:case VK_F1:case VK_F2:case VK_F3:case VK_F4:case VK_F5:case VK_F6:case VK_F7:case VK_F8:case VK_F9:case VK_F10:case VK_F11:case VK_F12:case VK_F13:case VK_F14:case VK_F15:case VK_F16:case VK_F17:case VK_F18:case VK_F19:case VK_F20:case VK_F21:case VK_F22:case VK_F23:case VK_F24:case VK_PRINTSCREEN:case VK_SCROLL_LOCK:case VK_CAPS_LOCK:case VK_NUM_LOCK:case VK_PAUSE:case GLFW_KEY_INSERT:case GLFW_KEY_BACKSPACE: {
-                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, '\0', KEY_LOCATION_UNKNOWN, KEY_TYPED,0, mods);
-                    sendKeyEvent(ev);
-                }*/
-            }
-        }
+    public void injectKeyTyped(int c, int mods) {
+        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_TYPED, 0, mods, 0, (char) c);
+        sendKeyEvent(ev);
     }
 
     public static int remapKeycode(int kc, char c) {
         switch (kc) {
             // Unable to remap
             case GLFW_KEY_BACKSPACE:
-                return KeyEvent.VK_BACK_SPACE;
+                return 0x08;
             case GLFW_KEY_DELETE:
                 return KeyEvent.VK_DELETE;
             case GLFW_KEY_DOWN:
@@ -209,10 +199,12 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         }
     }
 
+    private static final HashMap<Integer, Character> WORST_HACK = new HashMap<>();
+
     @Override
     public void injectKeyPressedByKeyCode(int keyCode, char c, int mods) {
-        if (c != '\0') {
-            synchronized (WORST_HACK) {
+        if(c != '\0') {
+            synchronized(WORST_HACK) {
                 WORST_HACK.put(keyCode, c);
             }
         }
@@ -221,12 +213,10 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         sendKeyEvent(ev);
     }
 
-    private static final Map<Integer, Character> WORST_HACK = new HashMap<>();
-
     @Override
     public void injectKeyReleasedByKeyCode(int keyCode, char c, int mods) {
-        if (c == '\0') {
-            synchronized (WORST_HACK) {
+        if(c == '\0') {
+            synchronized(WORST_HACK) {
                 c = WORST_HACK.getOrDefault(keyCode, '\0');
             }
         }
