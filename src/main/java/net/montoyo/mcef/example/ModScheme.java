@@ -1,11 +1,16 @@
 package net.montoyo.mcef.example;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ResourceLocation;
+import net.montoyo.mcef.MCEF;
+import net.montoyo.mcef.api.IScheme;
+import net.montoyo.mcef.api.ISchemeResponseData;
+import net.montoyo.mcef.api.ISchemeResponseHeaders;
+import net.montoyo.mcef.api.SchemePreResponse;
+import net.montoyo.mcef.utilities.Log;
+
 import java.io.IOException;
 import java.io.InputStream;
-
-import net.montoyo.mcef.MCEF;
-import net.montoyo.mcef.api.*;
-import net.montoyo.mcef.utilities.Log;
 
 public class ModScheme implements IScheme {
 
@@ -27,8 +32,12 @@ public class ModScheme implements IScheme {
             Log.warning("Invalid URL " + url);
             return SchemePreResponse.NOT_HANDLED;
         }
-        
-        is = ModScheme.class.getResourceAsStream("/assets/" + mod.toLowerCase() + "/html/" + loc.toLowerCase());
+
+        try {
+            is = Minecraft.getInstance().getResourceManager().getResource(new ResourceLocation(mod.toLowerCase(), "html/" + loc.toLowerCase())).getInputStream();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         if(is == null) {
             Log.warning("Resource " + url + " NOT found!");
             return SchemePreResponse.NOT_HANDLED; //Mhhhhh... 404?

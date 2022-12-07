@@ -3,7 +3,7 @@ package net.montoyo.mcef.remote;
 import java.util.ArrayList;
 
 /**
- * An {@link java.util.ArrayList} extended with utility functions for {@link Resource}
+ * An {@link ArrayList} extended with utility functions for {@link Resource}
  * @author montoyo
  *
  */

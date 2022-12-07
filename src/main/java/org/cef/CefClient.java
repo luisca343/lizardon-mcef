@@ -4,56 +4,14 @@
 
 package org.cef;
 
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefBrowserFactory;
-import org.cef.browser.CefFrame;
-import org.cef.browser.CefMessageRouter;
-import org.cef.browser.CefRequestContext;
-import org.cef.callback.CefAuthCallback;
-import org.cef.callback.CefBeforeDownloadCallback;
-import org.cef.callback.CefCallback;
-import org.cef.callback.CefContextMenuParams;
-import org.cef.callback.CefDownloadItem;
-import org.cef.callback.CefDownloadItemCallback;
-import org.cef.callback.CefDragData;
-import org.cef.callback.CefFileDialogCallback;
-import org.cef.callback.CefJSDialogCallback;
-import org.cef.callback.CefMenuModel;
-import org.cef.callback.CefPrintDialogCallback;
-import org.cef.callback.CefPrintJobCallback;
-import org.cef.handler.CefClientHandler;
-import org.cef.handler.CefContextMenuHandler;
-import org.cef.handler.CefDialogHandler;
-import org.cef.handler.CefDisplayHandler;
-import org.cef.handler.CefDownloadHandler;
-import org.cef.handler.CefDragHandler;
-import org.cef.handler.CefFocusHandler;
-import org.cef.handler.CefJSDialogHandler;
-import org.cef.handler.CefKeyboardHandler;
-import org.cef.handler.CefLifeSpanHandler;
-import org.cef.handler.CefLoadHandler;
-import org.cef.handler.CefPrintHandler;
-import org.cef.handler.CefRenderHandler;
-import org.cef.handler.CefRequestHandler;
-import org.cef.handler.CefResourceHandler;
-import org.cef.handler.CefResourceRequestHandler;
-import org.cef.handler.CefScreenInfo;
-import org.cef.handler.CefWindowHandler;
+import org.cef.browser.*;
+import org.cef.callback.*;
+import org.cef.handler.*;
 import org.cef.misc.BoolRef;
-import org.cef.misc.CefPrintSettings;
-import org.cef.misc.StringRef;
 import org.cef.network.CefRequest;
 import org.cef.network.CefRequest.TransitionType;
-import org.cef.network.CefResponse;
-import org.cef.network.CefURLRequest;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.FocusTraversalPolicy;
-import java.awt.KeyboardFocusManager;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.nio.ByteBuffer;
@@ -61,17 +19,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Vector;
 
-import javax.swing.SwingUtilities;
-
 /**
  * Client that owns a browser and renderer.
  */
 public class CefClient extends CefClientHandler
         implements CefContextMenuHandler, CefDialogHandler, CefDisplayHandler, CefDownloadHandler,
                    CefDragHandler, CefFocusHandler, CefJSDialogHandler, CefKeyboardHandler,
-                   CefLifeSpanHandler, CefLoadHandler, CefPrintHandler, CefRenderHandler,
-                   CefRequestHandler, CefWindowHandler {
-    private HashMap<Integer, CefBrowser> browser_ = new HashMap<Integer, CefBrowser>();
+                   CefLifeSpanHandler, CefLoadHandler, CefRenderHandler, CefRequestHandler,
+                   CefWindowHandler {
+    private HashMap<Integer, CefBrowser> browser_ = new HashMap<>();
     private CefContextMenuHandler contextMenuHandler_ = null;
     private CefDialogHandler dialogHandler_ = null;
     private CefDisplayHandler displayHandler_ = null;
@@ -82,7 +38,6 @@ public class CefClient extends CefClientHandler
     private CefKeyboardHandler keyboardHandler_ = null;
     private CefLifeSpanHandler lifeSpanHandler_ = null;
     private CefLoadHandler loadHandler_ = null;
-    private CefPrintHandler printHandler_ = null;
     private CefRequestHandler requestHandler_ = null;
     private boolean isDisposed_ = false;
     private volatile CefBrowser focusedBrowser_ = null;
@@ -104,7 +59,7 @@ public class CefClient extends CefClientHandler
      * The CTOR is only accessible within this package.
      * Use CefApp.createClient() to create an instance of
      * this class.
-     * @see org.cef.CefApp.createClient()
+     * @see CefApp#createClient()
      */
     CefClient() throws UnsatisfiedLinkError {
         super();
@@ -147,7 +102,7 @@ public class CefClient extends CefClientHandler
     @Override
     protected CefBrowser getBrowser(int identifier) {
         synchronized (browser_) {
-            return browser_.get((identifier));
+            return browser_.get(new Integer(identifier));
         }
     }
 
@@ -209,11 +164,6 @@ public class CefClient extends CefClientHandler
     }
 
     @Override
-    protected CefPrintHandler getPrintHandler() {
-        return this;
-    }
-
-    @Override
     protected CefRenderHandler getRenderHandler() {
         return this;
     }
@@ -242,8 +192,10 @@ public class CefClient extends CefClientHandler
     @Override
     public void onBeforeContextMenu(
             CefBrowser browser, CefFrame frame, CefContextMenuParams params, CefMenuModel model) {
+        /*
         if (contextMenuHandler_ != null && browser != null)
-            contextMenuHandler_.onBeforeContextMenu(browser, frame, params, model);
+            contextMenuHandler_.onBeforeContextMenu(browser, frame, params, model);*/
+        model.clear();
     }
 
     @Override
@@ -374,7 +326,6 @@ public class CefClient extends CefClientHandler
     }
 
     // CefDragHandler
-
     public CefClient addDragHandler(CefDragHandler handler) {
         if (dragHandler_ == null) dragHandler_ = handler;
         return this;
@@ -597,7 +548,6 @@ public class CefClient extends CefClientHandler
                 removeKeyboardHandler(this);
                 removeLifeSpanHandler(this);
                 removeLoadHandler(this);
-                removePrintHandler(this);
                 removeRenderHandler(this);
                 removeRequestHandler(this);
                 removeWindowHandler(this);
@@ -643,57 +593,6 @@ public class CefClient extends CefClientHandler
             String errorText, String failedUrl) {
         if (loadHandler_ != null && browser != null)
             loadHandler_.onLoadError(browser, frame, errorCode, errorText, failedUrl);
-    }
-
-    // CefPrintHandler
-
-    public CefClient addPrintHandler(CefPrintHandler handler) {
-        if (printHandler_ == null) printHandler_ = handler;
-        return this;
-    }
-
-    public void removePrintHandler() {
-        printHandler_ = null;
-    }
-
-    @Override
-    public void onPrintStart(CefBrowser browser) {
-        if (printHandler_ != null && browser != null) printHandler_.onPrintStart(browser);
-    }
-
-    @Override
-    public void onPrintSettings(
-            CefBrowser browser, CefPrintSettings settings, boolean getDefaults) {
-        if (printHandler_ != null && browser != null)
-            printHandler_.onPrintSettings(browser, settings, getDefaults);
-    }
-
-    @Override
-    public boolean onPrintDialog(
-            CefBrowser browser, boolean hasSelection, CefPrintDialogCallback callback) {
-        if (printHandler_ != null && browser != null)
-            return printHandler_.onPrintDialog(browser, hasSelection, callback);
-        return false;
-    }
-
-    @Override
-    public boolean onPrintJob(CefBrowser browser, String documentName, String pdfFilePath,
-            CefPrintJobCallback callback) {
-        if (printHandler_ != null && browser != null)
-            return printHandler_.onPrintJob(browser, documentName, pdfFilePath, callback);
-        return false;
-    }
-
-    @Override
-    public void onPrintReset(CefBrowser browser) {
-        if (printHandler_ != null && browser != null) printHandler_.onPrintReset(browser);
-    }
-
-    @Override
-    public Dimension getPdfPaperSize(CefBrowser browser, int deviceUnitsPerInch) {
-        if (printHandler_ != null && browser != null)
-            return printHandler_.getPdfPaperSize(browser, deviceUnitsPerInch);
-        return null;
     }
 
     // CefMessageRouter
@@ -794,7 +693,7 @@ public class CefClient extends CefClientHandler
     @Override
     public boolean onOpenURLFromTab(
             CefBrowser browser, CefFrame frame, String target_url, boolean user_gesture) {
-        if (isDisposed_) return true;
+		if (isDisposed_) return true;
         if (requestHandler_ != null && browser != null)
             return requestHandler_.onOpenURLFromTab(browser, frame, target_url, user_gesture);
         return false;
@@ -822,18 +721,23 @@ public class CefClient extends CefClientHandler
 
     @Override
     public boolean onQuotaRequest(
-            CefBrowser browser, String origin_url, long new_size, CefCallback callback) {
+            CefBrowser browser, String origin_url, long new_size, CefRequestCallback callback) {
         if (requestHandler_ != null && browser != null)
             return requestHandler_.onQuotaRequest(browser, origin_url, new_size, callback);
         return false;
     }
 
     @Override
-    public boolean onCertificateError(
-            CefBrowser browser, ErrorCode cert_error, String request_url, CefCallback callback) {
+    public boolean onCertificateError(CefBrowser browser, ErrorCode cert_error, String request_url,
+            CefRequestCallback callback) {
         if (requestHandler_ != null)
             return requestHandler_.onCertificateError(browser, cert_error, request_url, callback);
         return false;
+    }
+
+    @Override
+    public void onPluginCrashed(CefBrowser browser, String pluginPath) {
+        if (requestHandler_ != null) requestHandler_.onPluginCrashed(browser, pluginPath);
     }
 
     @Override

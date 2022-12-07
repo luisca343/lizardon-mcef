@@ -1,20 +1,11 @@
 package net.montoyo.mcef.client;
 
-import java.awt.Dimension;
-
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.Util;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class UpdateFrame extends JFrame implements IProgressListener {
     
@@ -57,6 +48,11 @@ public class UpdateFrame extends JFrame implements IProgressListener {
         
         setMinimumSize(new Dimension(540, 90));
         pack();
+    }
+
+    @Override
+    public void onError(String task, Throwable d) {
+
     }
 
     @Override

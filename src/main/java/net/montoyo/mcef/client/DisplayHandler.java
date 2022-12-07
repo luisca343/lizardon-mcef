@@ -1,13 +1,15 @@
 package net.montoyo.mcef.client;
 
+import net.minecraft.client.Minecraft;
 import net.montoyo.mcef.api.IDisplayHandler;
-
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefFrame;
 import org.cef.handler.CefDisplayHandler;
+import org.lwjgl.glfw.GLFW;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 public class DisplayHandler implements CefDisplayHandler {
@@ -20,7 +22,8 @@ public class DisplayHandler implements CefDisplayHandler {
         ADDRESS_CHANGE,
         TITLE_CHANGE,
         TOOLTIP,
-        STATUS_MESSAGE;
+        STATUS_MESSAGE,
+        CURSOR_CHANGE
 
     }
 
@@ -52,6 +55,10 @@ public class DisplayHandler implements CefDisplayHandler {
 
                 case STATUS_MESSAGE:
                     idh.onStatusMessage((CefBrowserOsr) browser, data);
+                    break;
+
+                case CURSOR_CHANGE:
+//                    idh.onCursorChange((CefBrowserOsr) browser, data);
                     break;
             }
         }
@@ -93,9 +100,37 @@ public class DisplayHandler implements CefDisplayHandler {
         return false;
     }
 
+    private long getMCEFWindowsHandler(){
+        return Minecraft.getInstance().getMainWindow().getHandle();
+    }
+
+    public static int remapCursor(int cursorType){
+        switch (cursorType){
+            case Cursor.CROSSHAIR_CURSOR:
+                return GLFW.GLFW_CROSSHAIR_CURSOR;
+            case Cursor.HAND_CURSOR:
+                return GLFW.GLFW_HAND_CURSOR;
+            case Cursor.MOVE_CURSOR:
+                return GLFW.GLFW_IBEAM_CURSOR;
+            case Cursor.S_RESIZE_CURSOR:
+            case Cursor.N_RESIZE_CURSOR:
+                return GLFW.GLFW_VRESIZE_CURSOR;
+            case Cursor.W_RESIZE_CURSOR:
+            case Cursor.E_RESIZE_CURSOR:
+                return GLFW.GLFW_HRESIZE_CURSOR;
+            default:
+                return GLFW.GLFW_ARROW_CURSOR;
+        }
+    }
     @Override
     public boolean onCursorChange(CefBrowser browser, int cursorType) {
-        return false;
+        //modified by nowandfuture
+        //modified for minecraft 1.13+(lwjgl3+)
+        long window_handle_ = getMCEFWindowsHandler();
+        //cast to a system cursor
+        long systemCursor = GLFW.glfwCreateStandardCursor(remapCursor(cursorType));
+        GLFW.glfwSetCursor(window_handle_, systemCursor);
+        return true;
     }
 
     public void addHandler(IDisplayHandler h) {

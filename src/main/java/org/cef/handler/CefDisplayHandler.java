@@ -14,7 +14,7 @@ import org.cef.browser.CefFrame;
  */
 public interface CefDisplayHandler {
     /**
-     * Browser address changed.
+     * Handle address changes.
      * @param browser The browser generating the event.
      * @param frame The frame generating the event.
      * @param url The new address.

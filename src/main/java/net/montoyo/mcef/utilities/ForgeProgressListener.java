@@ -1,15 +1,21 @@
 package net.montoyo.mcef.utilities;
 
-
 public class ForgeProgressListener implements IProgressListener {
 
+//    private ProgressManager.ProgressBar progressBar = null;
     private int lastVal = 0;
 
     private void stepUntil(int val) {
-        // FIXME: oh this doesn't do anything rlly
+        //FIXME: Bad, disgusting, and everything...
         while(lastVal < val) {
+//            progressBar.step("" + val + "%");
             lastVal++;
         }
+    }
+
+    @Override
+    public void onError(String task, Throwable d) {
+
     }
 
     @Override
@@ -19,12 +25,22 @@ public class ForgeProgressListener implements IProgressListener {
 
     @Override
     public void onTaskChanged(String name) {
-
+//        if(progressBar != null) {
+//            stepUntil(100);
+//            ProgressManager.pop(progressBar);
+//        }
+//
+//        progressBar = ProgressManager.push(name, 100, false);
+        lastVal = 0;
     }
 
     @Override
     public void onProgressEnd() {
-
+//        if(progressBar != null) {
+//            stepUntil(100);
+//            ProgressManager.pop(progressBar);
+//            progressBar = null;
+//        }
     }
 
 }

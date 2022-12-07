@@ -10,8 +10,8 @@ import org.cef.callback.CefNative;
 import org.cef.callback.CefQueryCallback;
 
 /**
- * Implement this interface to handle queries. All methods will be executed on the browser process
- * UI thread.
+ * Implement this interface to handle queries. All methods will be executed on
+ * the browser process UI thread.
  */
 public interface CefMessageRouterHandler extends CefNative {
     /**

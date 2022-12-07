@@ -5,12 +5,7 @@
 package org.cef.browser;
 
 import org.cef.CefClient;
-import org.cef.browser.CefRequestContext;
-import org.cef.callback.CefDragData;
-import org.cef.callback.CefNativeAdapter;
-import org.cef.callback.CefPdfPrintCallback;
-import org.cef.callback.CefRunFileDialogCallback;
-import org.cef.callback.CefStringVisitor;
+import org.cef.callback.*;
 import org.cef.handler.CefClientHandler;
 import org.cef.handler.CefDialogHandler.FileDialogMode;
 import org.cef.handler.CefRenderHandler;
@@ -18,18 +13,13 @@ import org.cef.handler.CefWindowHandler;
 import org.cef.misc.CefPdfPrintSettings;
 import org.cef.network.CefRequest;
 
-import java.awt.Canvas;
-import java.awt.Component;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Window;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.WindowEvent;
 import java.util.Vector;
-
-import javax.swing.SwingUtilities;
 
 /**
  * This class represents all methods which are connected to the
@@ -190,11 +180,11 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
      * Returns the native window handle for the specified native surface handle.
      */
     protected final long getWindowHandle(long surfaceHandle) {
-        try {
-            return N_GetWindowHandle(surfaceHandle);
-        } catch (UnsatisfiedLinkError err) {
-            err.printStackTrace();
-        }
+//        try {
+//            return N_GetWindowHandle(surfaceHandle);
+//        } catch (UnsatisfiedLinkError err) {
+//            err.printStackTrace();
+//        }
         return 0;
     }
 
@@ -533,9 +523,10 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
     }
 
     @Override
-    public void find(String searchText, boolean forward, boolean matchCase, boolean findNext) {
+    public void find(int identifier, String searchText, boolean forward, boolean matchCase,
+            boolean findNext) {
         try {
-            N_Find(searchText, forward, matchCase, findNext);
+            N_Find(identifier, searchText, forward, matchCase, findNext);
         } catch (UnsatisfiedLinkError ule) {
             ule.printStackTrace();
         }
@@ -794,8 +785,8 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
     private final native void N_Print();
     private final native void N_PrintToPDF(
             String path, CefPdfPrintSettings settings, CefPdfPrintCallback callback);
-    private final native void N_Find(
-            String searchText, boolean forward, boolean matchCase, boolean findNext);
+    private final native void N_Find(int identifier, String searchText, boolean forward,
+            boolean matchCase, boolean findNext);
     private final native void N_StopFinding(boolean clearSelection);
     private final native void N_CloseDevTools();
     private final native void N_ReplaceMisspelling(String word);

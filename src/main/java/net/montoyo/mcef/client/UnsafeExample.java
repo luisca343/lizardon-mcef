@@ -29,14 +29,14 @@ public class UnsafeExample {
             Field f = Unsafe.class.getDeclaredField("theUnsafe");
             f.setAccessible(true);
             theUnsafe = (Unsafe) f.get(null);
-            
+
             keyCode = KeyEvent.class.getDeclaredField("keyCode");
             keyChar = KeyEvent.class.getDeclaredField("keyChar");
             keyLocation = KeyEvent.class.getDeclaredField("keyLocation");
             id = AWTEvent.class.getDeclaredField("id");
             when = InputEvent.class.getDeclaredField("when");
             modifs = InputEvent.class.getDeclaredField("modifiers");
-            
+
             offsetCode = theUnsafe.objectFieldOffset(keyCode);
             offsetChar = theUnsafe.objectFieldOffset(keyChar);
             offsetLocation = theUnsafe.objectFieldOffset(keyLocation);

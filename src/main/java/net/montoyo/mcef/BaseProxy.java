@@ -1,27 +1,13 @@
 package net.montoyo.mcef;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.montoyo.mcef.api.*;
-import net.montoyo.mcef.client.UpdateFrame;
-import net.montoyo.mcef.remote.RemoteConfig;
-import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
-import org.cef.CefApp;
-import org.cef.CefSettings;
-import org.cef.OS;
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefMessageRouter;
-import org.cef.handler.CefLifeSpanHandlerAdapter;
-
-import java.io.File;
 
 public class BaseProxy implements API {
 
     public void onPreInit() {
     }
-    
+
     public void onInit() {
         Log.info("MCEF is running on server. Nothing to do.");
     }
@@ -74,6 +60,10 @@ public class BaseProxy implements API {
         return false;
     }
 
+    public void stopActivateBrowser(){
+
+    }
+
     public void onShutdown() {
     }
 
@@ -85,7 +75,7 @@ public class BaseProxy implements API {
     private static final int PUNYCODE_INITIAL_N = 128;
 
     private static int punycodeBiasAdapt(int delta, int numPoints, boolean firstTime) {
-        if(firstTime)
+        if (firstTime)
             delta /= PUNYCODE_DAMP;
         else
             delta /= 2;
@@ -93,7 +83,7 @@ public class BaseProxy implements API {
         int k = 0;
         delta = delta + delta / numPoints;
 
-        while(delta > ((36 - PUNYCODE_TMIN) * PUNYCODE_TMAX) / 2) {
+        while (delta > ((36 - PUNYCODE_TMIN) * PUNYCODE_TMAX) / 2) {
             delta /= 36 - PUNYCODE_TMIN;
             k += 36;
         }
@@ -104,17 +94,17 @@ public class BaseProxy implements API {
     private static void punycodeEncodeNumber(StringBuilder dst, int q, int bias) {
         boolean keepGoing = true;
 
-        for(int k = 36; keepGoing; k += 36) {
+        for (int k = 36; keepGoing; k += 36) {
             //Compute & clamp threshold
             int t = k - bias;
-            if(t < PUNYCODE_TMIN)
+            if (t < PUNYCODE_TMIN)
                 t = PUNYCODE_TMIN;
-            else if(t > PUNYCODE_TMAX)
+            else if (t > PUNYCODE_TMAX)
                 t = PUNYCODE_TMAX;
 
             //Compute digit
             int digit;
-            if(q < t) {
+            if (q < t) {
                 digit = q;
                 keepGoing = false;
             } else {
@@ -123,7 +113,7 @@ public class BaseProxy implements API {
             }
 
             //Encode digit
-            if(digit < 26)
+            if (digit < 26)
                 dst.append((char) ('a' + digit));
             else
                 dst.append((char) ('0' + digit - 26));
@@ -133,8 +123,8 @@ public class BaseProxy implements API {
     private static String punycodeEncodeString(int[] input) {
         StringBuilder output = new StringBuilder();
 
-        for(int i = 0; i < input.length; i++) {
-            if(input[i] < 128)
+        for (int i = 0; i < input.length; i++) {
+            if (input[i] < 128)
                 output.append((char) input[i]);
         }
 
@@ -144,26 +134,24 @@ public class BaseProxy implements API {
         int h = output.length();
         int b = h;
 
-        if(b > 0)
+        if (b > 0)
             output.append('-');
 
-        while(h < input.length) {
+        while (h < input.length) {
             int m = Integer.MAX_VALUE;
-            for(int i = 0; i < input.length; i++) {
-                if(input[i] >= n && input[i] < m)
-                    m = input[i];
+            for (int j : input) {
+                if (j >= n && j < m)
+                    m = j;
             }
 
             delta = delta + (m - n) * (h + 1);
             n = m;
 
-            for(int i = 0; i < input.length; i++) {
-                int c = input[i];
-
-                if(c < n)
+            for (int c : input) {
+                if (c < n)
                     delta++;
 
-                if(c == n) {
+                if (c == n) {
                     punycodeEncodeNumber(output, delta, bias);
                     bias = punycodeBiasAdapt(delta, h + 1, h == b);
                     delta = 0;
@@ -180,28 +168,29 @@ public class BaseProxy implements API {
 
     @Override
     public String punycode(String url) {
+        if(url == null) return "";
         int protoEnd = url.indexOf("://");
 
-        if(protoEnd < 0)
+        if (protoEnd < 0)
             protoEnd = 0;
         else
             protoEnd += 3;
 
         int hostEnd = url.indexOf('/', protoEnd);
-        if(hostEnd < 0)
+        if (hostEnd < 0)
             hostEnd = url.length();
 
         String hostname = url.substring(protoEnd, hostEnd);
         boolean doTransform = false;
 
-        for(int i = 0; i < hostname.length(); i++) {
-            if(hostname.charAt(i) >= 128) {
+        for (int i = 0; i < hostname.length(); i++) {
+            if (hostname.charAt(i) >= 128) {
                 doTransform = true;
                 break;
             }
         }
 
-        if(!doTransform)
+        if (!doTransform)
             return url;
 
         String[] parts = hostname.split("\\.");
@@ -210,22 +199,22 @@ public class BaseProxy implements API {
 
         sb.append(url, 0, protoEnd);
 
-        for(String p: parts) {
+        for (String p : parts) {
             doTransform = false;
 
-            for(int i = 0; i < p.length(); i++) {
-                if(p.charAt(i) >= 128) {
+            for (int i = 0; i < p.length(); i++) {
+                if (p.charAt(i) >= 128) {
                     doTransform = true;
                     break;
                 }
             }
 
-            if(first)
+            if (first)
                 first = false;
             else
                 sb.append('.');
 
-            if(doTransform)
+            if (doTransform)
                 sb.append(punycodeEncodeString(p.codePoints().toArray()));
             else
                 sb.append(p);
@@ -233,10 +222,6 @@ public class BaseProxy implements API {
 
         sb.append(url, hostEnd, url.length());
         return sb.toString();
-    }
-
-    public void initializeClient() {
-
     }
 
 }

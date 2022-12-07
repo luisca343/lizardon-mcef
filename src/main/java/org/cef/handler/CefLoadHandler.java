@@ -17,7 +17,6 @@ import java.util.Map;
 public interface CefLoadHandler {
     enum ErrorCode {
         ERR_NONE(0),
-        ERR_IO_PENDING(-1),
         ERR_FAILED(-2),
         ERR_ABORTED(-3),
         ERR_INVALID_ARGUMENT(-4),
@@ -28,23 +27,6 @@ public interface CefLoadHandler {
         ERR_UNEXPECTED(-9),
         ERR_ACCESS_DENIED(-10),
         ERR_NOT_IMPLEMENTED(-11),
-        ERR_INSUFFICIENT_RESOURCES(-12),
-        ERR_OUT_OF_MEMORY(-13),
-        ERR_UPLOAD_FILE_CHANGED(-14),
-        ERR_SOCKET_NOT_CONNECTED(-15),
-        ERR_FILE_EXISTS(-16),
-        ERR_FILE_PATH_TOO_LONG(-17),
-        ERR_FILE_NO_SPACE(-18),
-        ERR_FILE_VIRUS_INFECTED(-19),
-        ERR_BLOCKED_BY_CLIENT(-20),
-        ERR_NETWORK_CHANGED(-21),
-        ERR_BLOCKED_BY_ADMINISTRATOR(-22),
-        ERR_SOCKET_IS_CONNECTED(-23),
-        ERR_BLOCKED_ENROLLMENT_CHECK_PENDING(-24),
-        ERR_UPLOAD_STREAM_REWIND_NOT_SUPPORTED(-25),
-        ERR_CONTEXT_SHUT_DOWN(-26),
-        ERR_BLOCKED_BY_RESPONSE(-27),
-        ERR_CLEARTEXT_NOT_PERMITTED(-29),
         ERR_CONNECTION_CLOSED(-100),
         ERR_CONNECTION_RESET(-101),
         ERR_CONNECTION_REFUSED(-102),
@@ -61,6 +43,7 @@ public interface CefLoadHandler {
         ERR_SSL_VERSION_OR_CIPHER_MISMATCH(-113),
         ERR_SSL_RENEGOTIATION_REQUESTED(-114),
         ERR_PROXY_AUTH_UNSUPPORTED(-115),
+        ERR_CERT_ERROR_IN_SSL_RENEGOTIATION(-116),
         ERR_BAD_SSL_CLIENT_AUTH_CERT(-117),
         ERR_CONNECTION_TIMED_OUT(-118),
         ERR_HOST_RESOLVER_QUEUE_TOO_LARGE(-119),
@@ -114,9 +97,6 @@ public interface CefLoadHandler {
         ERR_WRONG_VERSION_ON_EARLY_DATA(-179),
         ERR_TLS13_DOWNGRADE_DETECTED(-180),
         ERR_SSL_KEY_USAGE_INCOMPATIBLE(-181),
-        ERR_INVALID_ECH_CONFIG_LIST(-182),
-        ERR_ECH_NOT_NEGOTIATED(-183),
-        ERR_ECH_FALLBACK_CERTIFICATE_INVALID(-184),
         ERR_CERT_COMMON_NAME_INVALID(-200),
         ERR_CERT_DATE_INVALID(-201),
         ERR_CERT_AUTHORITY_INVALID(-202),
@@ -133,6 +113,7 @@ public interface CefLoadHandler {
         ERR_CERTIFICATE_TRANSPARENCY_REQUIRED(-214),
         ERR_CERT_SYMANTEC_LEGACY(-215),
         ERR_CERT_KNOWN_INTERCEPTION_BLOCKED(-217),
+        ERR_SSL_OBSOLETE_VERSION(-218),
         ERR_CERT_END(-219),
         ERR_INVALID_URL(-300),
         ERR_DISALLOWED_URL_SCHEME(-301),
@@ -196,7 +177,6 @@ public interface CefLoadHandler {
         ERR_HTTP2_PUSHED_RESPONSE_DOES_NOT_MATCH(-378),
         ERR_HTTP_RESPONSE_CODE_FAILURE(-379),
         ERR_QUIC_CERT_ROOT_NOT_KNOWN(-380),
-        ERR_QUIC_GOAWAY_REQUEST_CAN_BE_RETRIED(-381),
         ERR_CACHE_MISS(-400),
         ERR_CACHE_READ_FAILURE(-401),
         ERR_CACHE_WRITE_FAILURE(-402),
@@ -216,8 +196,6 @@ public interface CefLoadHandler {
         ERR_ADD_USER_CERT_FAILED(-503),
         ERR_INVALID_SIGNED_EXCHANGE(-504),
         ERR_INVALID_WEB_BUNDLE(-505),
-        ERR_TRUST_TOKEN_OPERATION_FAILED(-506),
-        ERR_TRUST_TOKEN_OPERATION_SUCCESS_WITHOUT_SENDING_REQUEST(-507),
         ERR_FTP_FAILED(-601),
         ERR_FTP_SERVICE_UNAVAILABLE(-602),
         ERR_FTP_TRANSFER_ABORTED(-603),
@@ -245,9 +223,7 @@ public interface CefLoadHandler {
         ERR_DNS_CACHE_MISS(-804),
         ERR_DNS_SEARCH_EMPTY(-805),
         ERR_DNS_SORT_ERROR(-806),
-        ERR_DNS_SECURE_RESOLVER_HOSTNAME_RESOLUTION_FAILED(-808),
-        ERR_DNS_NAME_HTTPS_ONLY(-809),
-        ERR_DNS_REQUEST_CANCELLED(-810);
+        ERR_DNS_SECURE_RESOLVER_HOSTNAME_RESOLUTION_FAILED(-808);
 
         static private final Map<Integer, ErrorCode> CODES = new HashMap<>();
         static {
@@ -291,7 +267,7 @@ public interface CefLoadHandler {
      * loading is initiated either programmatically or by user action, and once when loading is
      * terminated due to completion, cancellation of failure.
      *
-     * @param browser The corresponding browser.
+     * @param browser The affected browser.
      * @param isLoading true if it is loading.
      * @param canGoBack true if you can navigate back.
      * @param canGoForward true if you can navigate forward.

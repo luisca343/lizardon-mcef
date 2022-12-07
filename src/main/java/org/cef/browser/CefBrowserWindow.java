@@ -4,7 +4,7 @@
 
 package org.cef.browser;
 
-import java.awt.Component;
+import java.awt.*;
 
 /**
  * Interface representing system dependent methods for the browser.

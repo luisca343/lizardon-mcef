@@ -2,17 +2,20 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
+// Modified by montoyo for MCEF
+
 package org.cef.browser;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.renderer.*;
+import com.nowandfuture.mod.utilities.Log;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.montoyo.mcef.MCEF;
-import net.montoyo.mcef.utilities.Log;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.util.ResourceLocation;
+import org.lwjgl.system.MemoryUtil;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
@@ -21,27 +24,25 @@ import java.util.ArrayList;
 import static org.lwjgl.opengl.EXTBGRA.GL_BGRA_EXT;
 import static org.lwjgl.opengl.GL11.*;
 
+//modified by nowandfuture, update to minecraft 1.16.5
 public class CefRenderer {
 
     //montoyo: debug tool
-    //montoyo: debug tool
     private static final ArrayList<Integer> GL_TEXTURES = new ArrayList<>();
-
     public static void dumpVRAMLeak() {
         Log.info(">>>>> MCEF: Beginning VRAM leak report");
         GL_TEXTURES.forEach(tex -> Log.warning(">>>>> MCEF: This texture has not been freed: " + tex));
         Log.info(">>>>> MCEF: End of VRAM leak report");
     }
 
-    private boolean transparent_;
-    public int[] texture_id_ = new int[1];
-    private int view_width_ = 0;
-    private int view_height_ = 0;
-    private float spin_x_ = 0f;
-    private float spin_y_ = 0f;
-    private Rectangle popup_rect_ = new Rectangle(0, 0, 0, 0);
-    private Rectangle original_popup_rect_ = new Rectangle(0, 0, 0, 0);
-    private boolean use_draw_pixels_ = false;
+    //modified by nowandfuture
+    //to use them in subclass private -> protect
+    protected boolean transparent_;
+    protected int[] texture_id_ = new int[1];
+    protected int view_width_ = 0;
+    protected int view_height_ = 0;
+    protected Rectangle popup_rect_ = new Rectangle(0, 0, 0, 0);
+    protected Rectangle original_popup_rect_ = new Rectangle(0, 0, 0, 0);
 
     protected CefRenderer(boolean transparent) {
         transparent_ = transparent;
@@ -52,72 +53,64 @@ public class CefRenderer {
         return transparent_;
     }
 
-    protected int getTextureID() {
-        return texture_id_[0];
-    }
-
+    @SuppressWarnings("static-access")
     protected void initialize() {
-        GlStateManager._enableTexture();
-        texture_id_[0] = GlStateManager._genTexture();
-        //.out.println("LA TEXTURA ES: ");
-        //System.out.println(texture_id_[0]);
+        RenderSystem.enableTexture();
+        texture_id_[0] = TextureUtil.generateTextureId();
 
-        if (MCEF.CHECK_VRAM_LEAK)
-            GL_TEXTURES.add(texture_id_[0]);
-
-        GlStateManager._bindTexture(texture_id_[0]);
-        GlStateManager._texParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        GlStateManager._texParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // GL21.glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-        GlStateManager._bindTexture(0);
+        RenderSystem.bindTexture(texture_id_[0]);
+        GlStateManager.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        GlStateManager.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        GlStateManager.texEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+        RenderSystem.bindTexture(0);
     }
 
     protected void cleanup() {
-        if (texture_id_[0] != 0) {
-            if (MCEF.CHECK_VRAM_LEAK){
-                GL_TEXTURES.remove((Object) texture_id_[0]);
-            }
-
-            GlStateManager._deleteTexture(texture_id_[0]);
+        if(texture_id_[0] != 0) {
+            TextureUtil.releaseTextureId(texture_id_[0]);
         }
     }
 
-    protected void render(MatrixStack matrix, double x1, double y1, double x2, double y2) {
-        Matrix4f positionMatrix = matrix.last().pose();
+    public void render(MatrixStack stack, float x1, float y1, float x2, float y2) {
+        if (view_width_ == 0 || view_height_ == 0)
+            return;
+
         Tessellator t = Tessellator.getInstance();
-        BufferBuilder vb = t.getBuilder();
+        BufferBuilder vb = t.getBuffer();
 
-        GlStateManager._bindTexture(texture_id_[0]);
-        vb.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-
-        vb.vertex(positionMatrix, (float) x1, (float) y1, 0.0f).uv(0.0f, 1.0f).color(255, 255, 255, 255).endVertex();
-        vb.vertex(positionMatrix, (float) x2, (float) y1, 0.0f).uv(1.f, 1.f).color(255, 255, 255, 255).endVertex();
-        vb.vertex(positionMatrix, (float) x2, (float) y2, 0.0f).uv(1.f, 0.0f).color(255, 255, 255, 255).endVertex();
-        vb.vertex(positionMatrix, (float) x1, (float) y2, 0.0f).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
-        t.end();
+        RenderSystem.bindTexture(texture_id_[0]);
+        vb.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        vb.pos(x1, y1, 0.0).tex(0.0f, 1.0f).endVertex();
+        vb.pos(x2, y1, 0.0).tex(1.f, 1.f).endVertex();
+        vb.pos(x2, y2, 0.0).tex(1.f, 0.0f).endVertex();
+        vb.pos(x1, y2, 0.0).tex(0.0f, 0.0f).endVertex();
+        t.draw();
+        RenderSystem.bindTexture(0);
     }
 
     protected void onPopupSize(Rectangle rect) {
-        if (rect.width <= 0 || rect.height <= 0) return;
+        if(rect.width <= 0 || rect.height <= 0)
+            return;
         original_popup_rect_ = rect;
         popup_rect_ = getPopupRectInWebView(original_popup_rect_);
     }
 
-    protected Rectangle getPopupRect() {
-        return (Rectangle) popup_rect_.clone();
-    }
-
-    protected Rectangle getPopupRectInWebView(Rectangle original_rect) {
-        Rectangle rc = original_rect;
+    protected Rectangle getPopupRectInWebView(Rectangle rc) {
         // if x or y are negative, move them to 0.
-        if (rc.x < 0) rc.x = 0;
-        if (rc.y < 0) rc.y = 0;
+        if(rc.x < 0)
+            rc.x = 0;
+        if(rc.y < 0)
+            rc.y = 0;
         // if popup goes outside the view, try to reposition origin
-        if (rc.x + rc.width > view_width_) rc.x = view_width_ - rc.width;
-        if (rc.y + rc.height > view_height_) rc.y = view_height_ - rc.height;
+        if(rc.x + rc.width > view_width_)
+            rc.x = view_width_ - rc.width;
+        if(rc.y + rc.height > view_height_)
+            rc.y = view_height_ - rc.height;
         // if x or y became negative, move them to 0 again.
-        if (rc.x < 0) rc.x = 0;
-        if (rc.y < 0) rc.y = 0;
+        if(rc.x < 0)
+            rc.x = 0;
+        if(rc.y < 0)
+            rc.y = 0;
         return rc;
     }
 
@@ -127,8 +120,8 @@ public class CefRenderer {
     }
 
     protected void onPaint(boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height, boolean completeReRender) {
-        if (transparent_) // Enable alpha blending.
-            GlStateManager._enableBlend();
+        if(transparent_) // Enable alpha blending.
+            RenderSystem.enableBlend();
 
         final int size = (width * height) << 2;
         if (size > buffer.limit()) {
@@ -137,54 +130,50 @@ public class CefRenderer {
         }
 
         // Enable 2D textures.
-        GlStateManager._enableTexture();
-        GlStateManager._bindTexture(texture_id_[0]);
+        RenderSystem.enableTexture();
+        RenderSystem.bindTexture(texture_id_[0]);
 
-        //System.out.println("ON BROWSER PAINT");
+        int oldAlignement = GlStateManager.getInteger(GL_UNPACK_ALIGNMENT);
+        GlStateManager.pixelStore(GL_UNPACK_ALIGNMENT, 1);
 
-        int oldAlignement = GlStateManager._getInteger(GL_UNPACK_ALIGNMENT);
-        //System.out.println("glGetInteger ok");
-        GlStateManager._pixelStore(GL_UNPACK_ALIGNMENT, 1);
-        //System.out.println("glPixelStore ok");
         if (!popup) {
             if (completeReRender || width != view_width_ || height != view_height_) {
                 // Update/resize the whole texture.
                 view_width_ = width;
                 view_height_ = height;
-                //System.out.println("going to glTexImage2D " + width + " " + height + " " + buffer.limit());
-                GlStateManager._pixelStore(GL_UNPACK_SKIP_PIXELS,0);
-                GlStateManager._pixelStore(GL_UNPACK_SKIP_ROWS,0);
-                GlStateManager._texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width_, view_height_, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer.asIntBuffer());
-                //System.out.println("glTexImage2D ok");
+
+                GlStateManager.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width_, view_height_, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, null);
+
+                GlStateManager.pixelStore(GL_UNPACK_ROW_LENGTH, view_width_);
+                GlStateManager.texSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, MemoryUtil.memAddress(buffer));
+                GlStateManager.pixelStore(GL_UNPACK_ROW_LENGTH, 0);
+
             } else {
-                //System.out.println("Noncomplete rerender processing pixel store");
-                GlStateManager._pixelStore(GL_UNPACK_ROW_LENGTH, view_width_);
+                GlStateManager.pixelStore(GL_UNPACK_ROW_LENGTH, view_width_);
 
                 // Update just the dirty rectangles.
                 for (Rectangle rect : dirtyRects) {
-                    //System.out.println("Updating rect");
                     if (rect.x < 0 || rect.y < 0 || rect.x + rect.width > view_width_ || rect.y + rect.height > view_height_)
                         Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (2)");
                     else {
-                        GlStateManager._pixelStore(GL_UNPACK_SKIP_PIXELS, rect.x);
-                        GlStateManager._pixelStore(GL_UNPACK_SKIP_ROWS, rect.y);
-                        glTexSubImage2D(GL_TEXTURE_2D, 0, rect.x, rect.y, rect.width, rect.height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+                        GlStateManager.pixelStore(GL_UNPACK_SKIP_PIXELS, rect.x);
+                        GlStateManager.pixelStore(GL_UNPACK_SKIP_ROWS, rect.y);
+                        GlStateManager.texSubImage2D(GL_TEXTURE_2D, 0, rect.x, rect.y, rect.width, rect.height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, MemoryUtil.memAddress(buffer));
                     }
                 }
-                //System.out.println("More GLPixel store stuff");
-                GlStateManager._pixelStore(GL_UNPACK_SKIP_PIXELS, 0);
-                GlStateManager._pixelStore(GL_UNPACK_SKIP_ROWS, 0);
-                GlStateManager._pixelStore(GL_UNPACK_ROW_LENGTH, 0);
+
+                GlStateManager.pixelStore(GL_UNPACK_SKIP_PIXELS, 0);
+                GlStateManager.pixelStore(GL_UNPACK_SKIP_ROWS, 0);
+                GlStateManager.pixelStore(GL_UNPACK_ROW_LENGTH, 0);
             }
-        } else if (popup_rect_.width > 0 && popup_rect_.height > 0) {
-            //System.out.println("Processing popup");
+        } else if(popup_rect_.width > 0 && popup_rect_.height > 0) {
             int skip_pixels = 0, x = popup_rect_.x;
             int skip_rows = 0, y = popup_rect_.y;
             int w = width;
             int h = height;
 
             // Adjust the popup to fit inside the view.
-            if (x < 0) {
+            if(x < 0) {
                 skip_pixels = -x;
                 x = 0;
             }
@@ -198,27 +187,33 @@ public class CefRenderer {
                 h -= y + h - view_height_;
 
             // Update the popup rectangle.
-            //System.out.println("glPixelStorei...");
-            GlStateManager._pixelStore(GL_UNPACK_ROW_LENGTH, width);
-            GlStateManager._pixelStore(GL_UNPACK_SKIP_PIXELS, skip_pixels);
-            GlStateManager._pixelStore(GL_UNPACK_SKIP_ROWS, skip_rows);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
-            GlStateManager._pixelStore(GL_UNPACK_ROW_LENGTH, 0);
-            GlStateManager._pixelStore(GL_UNPACK_SKIP_PIXELS, 0);
-            GlStateManager._pixelStore(GL_UNPACK_SKIP_ROWS, 0);
+            GlStateManager.pixelStore(GL_UNPACK_ROW_LENGTH, width);
+            GlStateManager.pixelStore(GL_UNPACK_SKIP_PIXELS, skip_pixels);
+            GlStateManager.pixelStore(GL_UNPACK_SKIP_ROWS, skip_rows);
+            GlStateManager.texSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_BGRA_EXT, GL_UNSIGNED_BYTE, MemoryUtil.memAddress(buffer));
+            GlStateManager.pixelStore(GL_UNPACK_ROW_LENGTH, 0);
+            GlStateManager.pixelStore(GL_UNPACK_SKIP_PIXELS, 0);
+            GlStateManager.pixelStore(GL_UNPACK_SKIP_ROWS, 0);
         }
-        //System.out.println("glPixelStorei final...");
-        GlStateManager._pixelStore(GL_UNPACK_ALIGNMENT, oldAlignement);
-        GlStateManager._bindTexture(0);
+
+        GlStateManager.pixelStore(GL_UNPACK_ALIGNMENT, oldAlignement);
+        RenderSystem.disableTexture();
+        RenderSystem.bindTexture(0);
     }
 
-    protected void setSpin(float spinX, float spinY) {
-        spin_x_ = spinX;
-        spin_y_ = spinY;
+    public int getViewWidth() {
+        return view_width_;
     }
 
-    protected void incrementSpin(float spinDX, float spinDY) {
-        spin_x_ -= spinDX;
-        spin_y_ -= spinDY;
+    public int getViewHeight() {
+        return view_height_;
+    }
+
+    public int getTextureId() {
+        return texture_id_[0];
+    }
+
+    public ResourceLocation getTextureLocation() {
+        return null;
     }
 }

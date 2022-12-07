@@ -1,7 +1,6 @@
 package net.montoyo.mcef.client;
 
 import net.montoyo.mcef.api.IJSQueryHandler;
-
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefFrame;

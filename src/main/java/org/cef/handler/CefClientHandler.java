@@ -4,12 +4,12 @@
 
 package org.cef.handler;
 
+import java.util.HashMap;
+import java.util.Vector;
+
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefMessageRouter;
 import org.cef.callback.CefNative;
-
-import java.util.HashMap;
-import java.util.Vector;
 
 /**
  * Implement this interface to provide handler implementations.
@@ -58,7 +58,7 @@ public abstract class CefClientHandler implements CefNative {
 
     /**
      * Returns the java part of the browser implementation.
-     * @param identifer the unique identifier of the browser.
+     * @param identifier the unique identifier of the browser.
      * @return The found browser or null if none is found.
      */
     abstract protected CefBrowser getBrowser(int identifier);
@@ -136,14 +136,6 @@ public abstract class CefClientHandler implements CefNative {
      * the native code.
      */
     abstract protected CefLoadHandler getLoadHandler();
-
-    /**
-     * Return the handler for printing on Linux. If a print handler is not
-     * provided then printing will not be supported on the Linux platform.
-     * This method is a callback method and is called by
-     * the native code.
-     */
-    abstract protected CefPrintHandler getPrintHandler();
 
     /**
      * Return the handler for off-screen rendering events.
@@ -255,14 +247,6 @@ public abstract class CefClientHandler implements CefNative {
         }
     }
 
-    protected void removePrintHandler(CefPrintHandler h) {
-        try {
-            N_removePrintHandler(h);
-        } catch (UnsatisfiedLinkError err) {
-            err.printStackTrace();
-        }
-    }
-
     protected synchronized void removeMessageRouter(CefMessageRouter h) {
         try {
             msgRouters.remove(h);
@@ -308,7 +292,6 @@ public abstract class CefClientHandler implements CefNative {
     private final native void N_removeKeyboardHandler(CefKeyboardHandler h);
     private final native void N_removeLifeSpanHandler(CefLifeSpanHandler h);
     private final native void N_removeLoadHandler(CefLoadHandler h);
-    private final native void N_removePrintHandler(CefPrintHandler h);
     private final native void N_removeMessageRouter(CefMessageRouter h);
     private final native void N_removeRenderHandler(CefRenderHandler h);
     private final native void N_removeRequestHandler(CefRequestHandler h);

@@ -14,8 +14,7 @@ import org.cef.handler.CefWindowHandler;
 import org.cef.misc.CefPdfPrintSettings;
 import org.cef.network.CefRequest;
 
-import java.awt.Component;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Vector;
 import java.util.concurrent.CompletableFuture;
@@ -323,12 +322,14 @@ public interface CefBrowser {
     /**
      * Search for some kind of text on the page.
      *
+     * @param identifier can be used to have multiple searches running simultaniously.
      * @param searchText to be searched for.
      * @param forward indicates whether to search forward or backward within the page.
      * @param matchCase indicates whether the search should be case-sensitive.
      * @param findNext indicates whether this is the first request or a follow-up.
      */
-    public void find(String searchText, boolean forward, boolean matchCase, boolean findNext);
+    public void find(int identifier, String searchText, boolean forward, boolean matchCase,
+            boolean findNext);
 
     /**
      * Cancel all searches that are currently going on.
@@ -362,8 +363,8 @@ public interface CefBrowser {
      * Captures a screenshot-like image of the currently displayed content and returns it.
      * <p>
      * If executed on the AWT Event Thread, this returns an immediately resolved {@link
-     * java.util.concurrent.CompletableFuture}. If executed from another thread, the {@link
-     * java.util.concurrent.CompletableFuture} returned is resolved as soon as the screenshot 
+     * CompletableFuture}. If executed from another thread, the {@link
+     * CompletableFuture} returned is resolved as soon as the screenshot
      * has been taken (which must happen on the event thread).
      * <p>
      * The generated screenshot can either be returned as-is, containing all natively-rendered

@@ -1,14 +1,20 @@
 package net.montoyo.mcef.virtual;
 
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
 
 public class VirtualBrowser implements IBrowser {
+    boolean activate = true;
 
     @Override
     public void close() {
+        activate = false;
+    }
+
+    @Override
+    public boolean isActivate() {
+        return activate;
     }
 
     @Override
@@ -16,7 +22,7 @@ public class VirtualBrowser implements IBrowser {
     }
 
     @Override
-    public void draw(MatrixStack matrixStack, double x1, double y1, double x2, double y2) {
+    public void draw(MatrixStack stack, double x1, double y1, double x2, double y2) {
     }
 
     @Override
@@ -29,11 +35,16 @@ public class VirtualBrowser implements IBrowser {
     }
 
     @Override
+    public void injectMouseDrag(int x, int y, int btn, int dragX, int dragY) {
+
+    }
+
+    @Override
     public void injectMouseButton(int x, int y, int mods, int btn, boolean pressed, int ccnt) {
     }
 
     @Override
-    public void injectKeyTyped(int key, int mods) {
+    public void injectKeyTyped(char c, int key_code, int mods) {
     }
 
     @Override

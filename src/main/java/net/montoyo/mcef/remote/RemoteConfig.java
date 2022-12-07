@@ -18,8 +18,6 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import static net.montoyo.mcef.client.ClientProxy.JCEF_ROOT;
-
 /**
  * A class for updating and parsing the remote configuration file.
  * @author montoyo
@@ -64,9 +62,9 @@ public class RemoteConfig {
      * @return The parsed configuration file.
      */
     private JsonObject readConfig() {
-        File newCfg = new File(JCEF_ROOT, "mcef2.new");
-        File cfgFle = new File(JCEF_ROOT, "mcef2.json");
-
+        File newCfg = new File(ClientProxy.JCEF_ROOT, "mcef2.new");
+        File cfgFle = new File(ClientProxy.JCEF_ROOT, "mcef2.json");
+        
         boolean ok = Util.download("config2.json", newCfg, null);
 
         if(ok) {
@@ -112,7 +110,7 @@ public class RemoteConfig {
         }
         
         String arch = System.getProperty("sun.arch.data.model");
-        if(!arch.equals("64")) {
+        if(!arch.equals("32") && !arch.equals("64")) {
             //Shouldn't happen.
             Log.error("Your CPU arch isn't supported by MCEF. Entering virtual mode.");
             ClientProxy.VIRTUAL = true;
@@ -161,15 +159,11 @@ public class RemoteConfig {
                     extract.add(e.getAsString());
             }
         }
-
-        String actualVersion = String.valueOf(Minecraft.getInstance().getGame().getVersion());
         
         JsonElement mcVersions = json.get("latestVersions");
         if(mcVersions != null && mcVersions.isJsonObject()) {
-            JsonElement cVer = mcVersions.getAsJsonObject().get("1.16.5");
+            JsonElement cVer = mcVersions.getAsJsonObject().get(Minecraft.getInstance().getVersion());
 
-            // My glibc version is 2.31 :( so newer doesn't work
-            
             if(cVer != null && cVer.isJsonPrimitive())
                 version = cVer.getAsString();
         }
@@ -266,7 +260,7 @@ public class RemoteConfig {
 
         if(!zipOnly) {
             for(Resource r: resources)
-                fl.addFile(JCEF_ROOT + "/" + r.getFileName());
+                fl.addFile(r.getFileName());
         }
 
         boolean allOk = true;

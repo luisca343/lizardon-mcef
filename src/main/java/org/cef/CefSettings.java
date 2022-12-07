@@ -10,6 +10,10 @@ package org.cef;
  * line switches.
  */
 public class CefSettings {
+    //Mac OS needed
+    public String main_bundle_path;
+    public String framework_dir_path;
+
     /**
      * Log severity levels.
      */
@@ -74,10 +78,6 @@ public class CefSettings {
             return res;
         }
     }
-
-    // MacOS specific settings
-    public String framework_dir_path = null;
-    public String main_bundle_path = null;
 
     /**
      * The path to a separate executable that will be launched for sub-processes.
@@ -234,8 +234,6 @@ public class CefSettings {
     @Override
     public CefSettings clone() {
         CefSettings tmp = new CefSettings();
-        tmp.framework_dir_path = framework_dir_path; // for MacOS
-        tmp.main_bundle_path = main_bundle_path; // for MacOS
         tmp.browser_subprocess_path = browser_subprocess_path;
         tmp.windowless_rendering_enabled = windowless_rendering_enabled;
         tmp.command_line_args_disabled = command_line_args_disabled;

@@ -4,6 +4,7 @@
 
 package org.cef.handler;
 
+import java.awt.Dimension;
 import org.cef.browser.CefBrowser;
 import org.cef.callback.CefNative;
 import org.cef.callback.CefPrintDialogCallback;
@@ -64,14 +65,13 @@ public interface CefPrintHandler extends CefNative {
      *
      * @param browser The corresponding browser.
      */
-    void onPrintReset(CefBrowser browser);
-
+    void onPrintReset(CefBrowser browser) ;
+    
     /**
      * Called to retrieve the page size when printToPDF is requested for a browser.
      *
-     * @param browser The corresponding browser.
      * @param deviceUnitsPerInch The DPI of the print. Use this to calculate the page size to use.
      * @return The page size in microns.
      */
-    Dimension getPdfPaperSize(CefBrowser browser, int deviceUnitsPerInch);
+    Dimension getPdfPaperSize(int deviceUnitsPerInch);
 }

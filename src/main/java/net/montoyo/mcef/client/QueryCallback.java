@@ -1,7 +1,7 @@
 package net.montoyo.mcef.client;
 
-import org.cef.callback.CefQueryCallback;
 import net.montoyo.mcef.api.IJSQueryCallback;
+import org.cef.callback.CefQueryCallback;
 
 public class QueryCallback implements IJSQueryCallback {
 

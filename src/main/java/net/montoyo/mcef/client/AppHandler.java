@@ -1,9 +1,9 @@
 package net.montoyo.mcef.client;
 
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IScheme;
 import net.montoyo.mcef.utilities.Log;
-
 import org.cef.CefApp;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
@@ -91,6 +91,7 @@ public class AppHandler extends CefAppHandlerAdapter {
         @Override
         public CefResourceHandler create(CefBrowser browser, CefFrame frame, String schemeName, CefRequest request) {
             try {
+
                 return new SchemeResourceHandler(cls.newInstance());
             } catch(Throwable t) {
                 t.printStackTrace();
