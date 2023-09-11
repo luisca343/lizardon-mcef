@@ -23,6 +23,16 @@ public abstract class CefAppHandlerAdapter implements CefAppHandler {
 
     @Override
     public void onBeforeCommandLineProcessing(String process_type, CefCommandLine command_line) {
+        System.out.println("Actualizado el coso ese del coso para no tocar");
+        command_line.appendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
+        //command_line.appendArgument("disable-gpu");
+
+        command_line.appendArgument("enable-gpu");
+        command_line.appendArgument("enable-gpu-compositing");
+        command_line.appendArgument("enable-webgl");
+        command_line.appendArgument("enable-chrome-runtime");
+
+
         if (process_type.isEmpty() && args_ != null) {
             // Forward switches and arguments from Java to Cef
             boolean parseSwitchesDone = false;

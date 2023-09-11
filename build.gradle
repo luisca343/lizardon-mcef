@@ -19,7 +19,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 
-version = '2.0'
+version = '2.1'
 group = 'com.nowandfuture.mcef'
 
 archivesBaseName = "mcef-${project.mcversion}"

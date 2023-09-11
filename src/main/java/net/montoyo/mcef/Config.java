@@ -33,7 +33,7 @@ public class Config {
         SKIP_UPDATES = CLIENT_BUILDER.comment("Do not update binaries.").define("skipUpdate", false);
         WARN_UPDATES = CLIENT_BUILDER.comment("Tells in the chat if a new version of MCEF is available.").define("warnUpdate", true);
         USE_FORGE_SPLASH    = CLIENT_BUILDER.comment("Use Forge's splash screen to display resource download progress (may be unstable).").define("useForgeSplash", true);
-        CEF_ARGS            = CLIENT_BUILDER.comment("Command line arguments passed to CEF. For advanced users.").define("cefArgs", "--disable-gpu");
+        CEF_ARGS            = CLIENT_BUILDER.comment("Command line arguments passed to CEF. For advanced users.").define("cefArgs", "--enable-chrome-runtime --enable-webgl");
         SHUTDOWN_JCEF       = CLIENT_BUILDER.comment("Set this to true if your Java process hangs after closing Minecraft. This is disabled by default because it makes the launcher think Minecraft crashed...").define("shutdownJcef", false);
         SECURE_MIRRORS_ONLY = CLIENT_BUILDER.comment( "Only enable secure (HTTPS) mirror. This should be kept to true unless you know what you're doing.").define("secureMirrorsOnly", true);
         FPS_TAKE_ON         = CLIENT_BUILDER.comment( "Setting the FPS of browser take on.").defineInRange("fpsTakeOn", 100, 0, 100);

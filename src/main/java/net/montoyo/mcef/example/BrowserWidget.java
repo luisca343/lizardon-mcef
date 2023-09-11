@@ -3,6 +3,7 @@ package net.montoyo.mcef.example;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.util.text.ITextComponent;
@@ -34,6 +35,11 @@ public class BrowserWidget extends Widget implements ITickable {
 
     public void setUrlToLoad(@Nullable String urlToLoad) {
         this.urlToLoad = urlToLoad;
+    }
+
+    @Override
+    public void playDownSound(SoundHandler handler) {
+        super.playDownSound(handler);
     }
 
     public void init(){
