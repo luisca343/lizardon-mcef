@@ -224,6 +224,7 @@ public class ClientProxy extends BaseProxy {
             //For debug, to make the log effective I leave it here...
             settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_VERBOSE;
 
+
             /*
              *  Mac OS locales_dir_path will init at CefApp#initialize
              */
