@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class MCEFDownloader {
-    private static String DOMAIN = "http://share.nowandfuture.top/cef";
+    private static String DOMAIN = "https://api.boffmedia.es/jcef/";
     public static String CONFIG_NAME = "downloads.json";
 
     public static void prepareConfigsMirror() {
