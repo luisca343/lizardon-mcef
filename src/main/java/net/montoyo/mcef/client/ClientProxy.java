@@ -420,7 +420,7 @@ public class ClientProxy extends BaseProxy {
     public IBrowser createBrowser(String url) {
         if (VIRTUAL)
             return new VirtualBrowser();
-        return createBrowser(url, false);
+        return createBrowser(url, true);
     }
 
     private void runMessageLoopFor(long ms) {
