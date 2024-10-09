@@ -370,9 +370,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectKeyTyped(char c, int key_code, int mods) {
-        System.out.println(c + " " + key_code);
 
-        KeyEvent ev = new UnsafeExample().makeEvent(dc_, key_code, (char) c, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
+        KeyEvent ev = new UnsafeExample().makeEvent(dc_, key_code, c, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
         //KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_TYPED, System.currentTimeMillis(), mods, key_code, c);
         sendKeyEvent(ev);
     }

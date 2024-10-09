@@ -53,7 +53,7 @@ public class UnsafeExample {
         theUnsafe.putInt(event, offsetChar, keyChar);
         theUnsafe.putInt(event, offsetLocation, location);
         theUnsafe.putInt(event, offsetId, type);
-        theUnsafe.putInt(event, offsetModifs, modifs);
+        //theUnsafe.putInt(event, offsetModifs, modifs);
         theUnsafe.putLong(event, offsetWhen, time);
         return event;
     }
