@@ -23,27 +23,31 @@ public abstract class CefAppHandlerAdapter implements CefAppHandler {
 
     @Override
     public void onBeforeCommandLineProcessing(String process_type, CefCommandLine command_line) {
-        System.out.println("Actualizado el coso ese del coso para no tocar");
         command_line.appendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 
 
 
-        command_line.appendArgument("enable-gpu");
-        command_line.appendArgument("enable-gpu-compositing");
-        command_line.appendArgument("enable-webgl");
-        command_line.appendArgument("enable-chrome-runtime");
-        // Set mobile mode
-        command_line.appendSwitchWithValue("user-agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Mobile Safari/537.36");
-
-        command_line.appendArgument("disable-web-security");
-
-
+        //command_line.appendArgument("enable-gpu");
+        //command_line.appendArgument("enable-gpu-compositing");
+        //command_line.appendArgument("enable-webgl");
+        //command_line.appendArgument("enable-chrome-runtime");
+        //command_line.appendSwitchWithValue("user-agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Mobile Safari/537.36");
+        //command_line.appendArgument("disable-web-security");
 
         //command_line.appendArgument("disable-gpu");
         //command_line.appendArgument("disable-gpu-compositing");
         //command_line.appendArgument("disable-begin-frame-scheduling");
 
+        command_line.appendArgument("disable-gpu");
+        command_line.appendArgument("disable-gpu-compositing");
 
+        command_line.appendArgument("disable-application-cache");
+        command_line.appendArgument("disable-cache");
+
+        command_line.appendArgument("enable-logging");
+        command_line.appendArgument("v=1");
+
+        command_line.appendArgument("enable-javascript-harmony");
 
         //command_line.appendSwitchWithValue("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Lizardon/1.0.0 Chrome/80.0.3987.163 Safari/537.36");
 
