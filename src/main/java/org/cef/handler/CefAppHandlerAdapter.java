@@ -23,35 +23,34 @@ public abstract class CefAppHandlerAdapter implements CefAppHandler {
 
     @Override
     public void onBeforeCommandLineProcessing(String process_type, CefCommandLine command_line) {
-        command_line.appendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
+    // Allow autoplay without requiring user gesture
+            command_line.appendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 
+    // ✅ Enable GPU acceleration
+            command_line.appendArgument("enable-gpu");
+            command_line.appendArgument("enable-gpu-compositing");
+            command_line.appendArgument("enable-webgl");
 
+    // ✅ Force GPU features even if blacklisted
+            command_line.appendArgument("ignore-gpu-blocklist");
 
-        //command_line.appendArgument("enable-gpu");
-        //command_line.appendArgument("enable-gpu-compositing");
-        //command_line.appendArgument("enable-webgl");
-        //command_line.appendArgument("enable-chrome-runtime");
-        //command_line.appendSwitchWithValue("user-agent", "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Mobile Safari/537.36");
-        //command_line.appendArgument("disable-web-security");
+    // ✅ Accelerate common operations
+            command_line.appendArgument("enable-accelerated-2d-canvas");
+            command_line.appendArgument("enable-accelerated-video-decode");
 
-        //command_line.appendArgument("disable-gpu");
-        //command_line.appendArgument("disable-gpu-compositing");
-        //command_line.appendArgument("disable-begin-frame-scheduling");
+    // ✅ Remove FPS limit (Chromium sometimes caps at 60fps)
+            command_line.appendArgument("disable-frame-rate-limit");
 
-        command_line.appendArgument("disable-gpu");
-        command_line.appendArgument("disable-gpu-compositing");
+    // ✅ Disable cache (optional, good for dev / testing)
+            command_line.appendArgument("disable-application-cache");
+            command_line.appendArgument("disable-cache");
 
-        command_line.appendArgument("disable-application-cache");
-        command_line.appendArgument("disable-cache");
+    // ✅ Enable logging for debugging
+            command_line.appendArgument("enable-logging");
+            command_line.appendArgument("v=1");
 
-        command_line.appendArgument("enable-logging");
-        command_line.appendArgument("v=1");
-
+    // ✅ Enable modern JavaScript features
         command_line.appendArgument("enable-javascript-harmony");
-
-        //command_line.appendSwitchWithValue("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Lizardon/1.0.0 Chrome/80.0.3987.163 Safari/537.36");
-
-
 
 
         if (process_type.isEmpty() && args_ != null) {
